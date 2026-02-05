@@ -44,20 +44,48 @@ class CustomError extends Error {
     }
 }
 
-function errorFunction(a, b, c) {
-    if (typeof a !== "string") {
-        throw new TypeError("El parametro a no es un String")
-    } else if (typeof b !== "number") {
-        throw new TypeError("El parametro b no es un Number")
-    } else if (!Array.isArray(c)) {
-        throw new CustomError("El parametro c no es un Array")
+const rules = [
+    {
+        validate: ({ a }) => typeof a === "string",
+        error: () => new TypeError("El parametro a no es un String")
+    },
+    {
+        validate: ({ b }) => typeof b === "number",
+        error: () => new TypeError("El parametro b no es un Number")
+    },
+    {
+        validate: ({ c }) => Array.isArray(c),
+        error: () => new CustomError("El parametro c no es un Array")
     }
+]
 
+function errorFunction({ a, b, c }) {
+    for (const rule of rules) {
+        if (!rule.validate({ a, b, c })) {
+            throw rule.error()
+        }
+    }
     console.log(`a: ${typeof a} - b: ${typeof b} - c: ${typeof c}`)
 }
 
+
+// function errorFunction(a, b, c) {
+//     if (typeof a !== "string") {
+//         throw new TypeError("El parametro a no es un String")
+//     } else if (typeof b !== "number") {
+//         throw new TypeError("El parametro b no es un Number")
+//     } else if (!Array.isArray(c)) {
+//         throw new CustomError("El parametro c no es un Array")
+//     }
+
+//     console.log(`a: ${typeof a} - b: ${typeof b} - c: ${typeof c}`)
+// }
+
 try {
-    errorFunction("2", 2, [2])
+    // errorFunction({ a: 2, b: 2, c: [2] })
+    // errorFunction({ a: "2", b: "2", c: [2] })
+    // errorFunction({ a: "2", b: 2, c: 2 })
+    errorFunction({ a: "2", b: 2, c: [2] })
 } catch (error) {
     console.error(`${error.name}: ${error.message}`)
 } finally {
